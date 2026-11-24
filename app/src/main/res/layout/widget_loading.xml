@@ -1,0 +1,6 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="Overdraw"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#181818" android:gravity="center" android:textColor="#FFFFFF"
+    android:text="@string/widget_loading" />

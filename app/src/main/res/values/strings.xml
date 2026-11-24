@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Nothing Shopping</string>
+    <string name="widget_name">Shopping list</string>
+    <string name="widget_description">An offline, scrollable shopping list</string>
+    <string name="widget_loading">Loading shopping list…</string>
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <style name="EditorTheme" parent="android:style/Theme.Material.Dialog.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimAmount">0.55</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowMinWidthMajor">65%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+    </style>
+</resources>
