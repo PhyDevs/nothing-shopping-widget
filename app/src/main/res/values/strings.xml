@@ -3,6 +3,8 @@
     <string name="widget_name">Shopping list</string>
     <string name="widget_description">An offline, scrollable shopping list</string>
     <string name="widget_loading">Loading shopping list…</string>
+    <string name="meal_widget_name">Meal Planner</string>
+    <string name="meal_widget_description">Today’s meals on a recurring three-day plan</string>
     <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>

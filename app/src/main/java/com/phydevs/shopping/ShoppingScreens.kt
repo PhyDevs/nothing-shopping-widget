@@ -30,6 +30,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -64,30 +68,59 @@ class MainActivity : ComponentActivity() {
         val dao = ShoppingDatabase.dao(this)
         setContent {
             ShoppingTheme {
-                MainScreen(
-                    dao = dao,
-                    openEditor = { id ->
-                        startActivity(Intent(this, EditorActivity::class.java)
-                            .putExtra(EditorActivity.MODE, if (id == null) "add" else "edit")
-                            .putExtra(EditorActivity.ITEM, id ?: 0L))
-                    },
-                    mutate = { change ->
-                        lifecycleScope.launch {
-                            change()
-                            refreshWidgets(applicationContext)
+                var mealSection by rememberSaveable { mutableStateOf(false) }
+                val sectionStates = rememberSaveableStateHolder()
+                val canPin = AppWidgetManager.getInstance(this).isRequestPinAppWidgetSupported
+                Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    Column(Modifier.safeDrawingPadding()) {
+                        TabRow(selectedTabIndex = if (mealSection) 1 else 0) {
+                            Tab(!mealSection, { mealSection = false }, text = { Text("Shopping") })
+                            Tab(mealSection, { mealSection = true }, text = { Text("Meal Planner") })
                         }
-                    },
-                    pin = ::pinWidget,
-                    canPin = AppWidgetManager.getInstance(this).isRequestPinAppWidgetSupported,
-                )
+                        sectionStates.SaveableStateProvider(if (mealSection) "meals" else "shopping") {
+                            if (mealSection) {
+                                val meals = remember { MealDatabase.dao(this@MainActivity) }
+                                MealPlansScreen(
+                                    dao = meals,
+                                    canPin = canPin,
+                                    pin = { pinWidget(MealPlanWidgetReceiver::class.java, "Meal Planner") },
+                                    save = { plan, entries, complete ->
+                                        lifecycleScope.launch {
+                                            val saved = meals.savePlan(plan, entries)
+                                            complete(saved)
+                                            if (saved) MealPlanWidget().updateAll(applicationContext)
+                                        }
+                                    },
+                                )
+                            } else {
+                                MainScreen(
+                                    dao = dao,
+                                    openEditor = { id ->
+                                        startActivity(Intent(this@MainActivity, EditorActivity::class.java)
+                                            .putExtra(EditorActivity.MODE, if (id == null) "add" else "edit")
+                                            .putExtra(EditorActivity.ITEM, id ?: 0L))
+                                    },
+                                    mutate = { change ->
+                                        lifecycleScope.launch {
+                                            change()
+                                            refreshWidgets(applicationContext)
+                                        }
+                                    },
+                                    pin = { pinWidget(ShoppingWidgetReceiver::class.java, "Shopping list") },
+                                    canPin = canPin,
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
-    private fun pinWidget() {
+    private fun pinWidget(receiver: Class<*>, label: String) {
         val accepted = AppWidgetManager.getInstance(this)
-            .requestPinAppWidget(ComponentName(this, ShoppingWidgetReceiver::class.java), null, null)
-        if (!accepted) Toast.makeText(this, "Open your launcher's widget picker to add Shopping list.", Toast.LENGTH_LONG).show()
+            .requestPinAppWidget(ComponentName(this, receiver), null, null)
+        if (!accepted) Toast.makeText(this, "Open your launcher's widget picker to add $label.", Toast.LENGTH_LONG).show()
     }
 }
 

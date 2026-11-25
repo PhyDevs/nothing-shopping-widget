@@ -65,3 +65,20 @@ Keep an encrypted backup of the keystore and passwords. Under **Settings → Sec
 | `SHOPPING_KEY_PASSWORD` | Key password. For the PKCS12 command above, use the keystore password. |
 
 Push to `main` or manually run the workflow on `main` to produce the consistently signed APK. Pull request builds use transient debug signing. Keep the keystore and its Base64 encoding out of Git.
+
+## Meal Planner
+
+The same APK includes a second, independent widget. Open **Meal Planner** in the app to switch between the three plans, tap a meal to edit its category, 24-hour time, or description, and add an optional fifth meal. To go back to four meals, open a meal and tap **Remove meal**. Saving orders the meals by time. **Preview today** shows the plan selected for your phone's current date, and **Preview Saturday** shows the artwork.
+
+Tap **Pin widget** in Meal Planner, or choose **Meal Planner** in the launcher's widget picker. Start at roughly **4 columns × 5 rows** to see all five meals at once. Shorter layouts and larger system font sizes may make the list scroll. Long descriptions may be shortened in the widget and are fully visible in the app.
+
+| Local day | Widget display |
+| --- | --- |
+| Monday and Thursday | Day 1 |
+| Tuesday and Friday | Day 2 |
+| Wednesday and Sunday | Day 3 |
+| Saturday | Artwork only |
+
+The widget follows your phone's time zone and schedules one inexact midnight refresh while a Meal Planner widget is installed. Android may delay that refresh during Doze or under launcher and device background restrictions. The widget also refreshes after reboot, clock or time-zone changes, plan edits, and app updates. No exact-alarm permission is required.
+
+Meal plans and their illustrative defaults are stored in a separate Room database. Installing this version over a compatible, identically signed APK preserves the shopping list and its settings.
