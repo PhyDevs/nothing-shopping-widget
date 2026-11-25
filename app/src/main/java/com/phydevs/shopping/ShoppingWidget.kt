@@ -33,7 +33,7 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.lazy.LazyColumn
-import androidx.glance.appwidget.lazy.items
+import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.glance.color.ColorProvider as DayNightColor
@@ -172,27 +172,30 @@ private fun ShoppingContent(
             )
         } else {
             LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
-                items(rows, itemId = { it.item.id }) { row ->
+                itemsIndexed(rows, itemId = { _, row -> row.item.id }) { index, row ->
                     val item = row.item
-                    Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        WidgetButton("○", "Purchase ${item.name}", widgetAction("purchase", item.id), ink)
-                        Column(
-                            GlanceModifier.defaultWeight().padding(vertical = 4.dp)
-                                .clickable(editorAction(context, "edit", item.id)),
-                        ) {
-                            Text(item.name, style = TextStyle(
-                                color = if (item.priority == Priority.HIGH) red else ink,
-                                fontSize = 14.sp, fontWeight = FontWeight.Medium,
-                            ), maxLines = 1)
-                            Text(
-                                listOfNotNull(row.store?.name, item.priority.label).joinToString(" · "),
-                                style = TextStyle(color = muted, fontSize = 11.sp), maxLines = 1,
-                            )
+                    Column(GlanceModifier.fillMaxWidth()) {
+                        Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            WidgetButton("○", "Purchase ${item.name}", widgetAction("purchase", item.id), ink)
+                            Column(
+                                GlanceModifier.defaultWeight().padding(vertical = 4.dp)
+                                    .clickable(editorAction(context, "edit", item.id)),
+                            ) {
+                                Text(item.name, style = TextStyle(
+                                    color = if (item.priority == Priority.HIGH) red else ink,
+                                    fontSize = 14.sp, fontWeight = FontWeight.Medium,
+                                ), maxLines = 1)
+                                Text(
+                                    listOfNotNull(row.store?.name, item.priority.label).joinToString(" · "),
+                                    style = TextStyle(color = muted, fontSize = 11.sp), maxLines = 1,
+                                )
+                            }
+                            WidgetButton("×", "Delete ${item.name}", widgetAction("remove", item.id), muted)
                         }
-                        WidgetButton("×", "Delete ${item.name}", widgetAction("remove", item.id), muted)
+                        if (index < rows.lastIndex) {
+                            Spacer(GlanceModifier.fillMaxWidth().height(1.dp).background(separator))
+                        }
                     }
-                    Spacer(GlanceModifier.fillMaxWidth().height(1.dp)
-                        .background(separator))
                 }
             }
         }
